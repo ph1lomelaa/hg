@@ -1,0 +1,35 @@
+# конфиденциальные и лишние файлы
+.env
+.env.*
+tokens/
+tokens/
+*.pem
+*.key
+*.p12
+
+# node / ide
+node_modules/
+.DS_Store
+.vscode/
+.idea/
+npm-debug.log
+dist/
+public/presentations/*.pdf
+googlechrome.dmg
+.env
+tokens/
+arab
+eng
+arab/
+eng/
+.env
+.env.*
+tokens/
+.wwebjs_auth/
+.wwebjs_cache/
+googlechrome.dmg
+public/presentations/
+
+.DS_Store
+.vscode/
+.idea/
