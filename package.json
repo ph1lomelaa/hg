@@ -2,7 +2,7 @@
   "name": "whatsapp-bot",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "index2.js",
   "scripts": {
     "start": "node index2.js",
     "start:poll": "node index2.js",
