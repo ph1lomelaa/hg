@@ -39,7 +39,8 @@ if (!GREEN_API_ID_INSTANCE || !GREEN_API_API_TOKEN_INSTANCE || !SPREADSHEET_WEBA
 const GREEN_API_URL = `https://api.green-api.com/waInstance${GREEN_API_ID_INSTANCE}`;
 const MEDIA_URL = GREEN_MEDIA_URL;
 
-const extractPhone = (jid) => (jid || '').replace(/[@:\\D]/g, '');
+const extractPhone = (jid) => String(jid || '').replace(/[^0-9]/g, '');
+
 const norm = (s = '') => s.toLowerCase().trim();
 
 function getFormattedDateTime() {
@@ -342,6 +343,23 @@ const NAME_PART2_COLOR = '#302525';
 const NAME_FIGMA_TOP = 1059;
 
 /* === НОВАЯ БЫСТРАЯ ГЕНЕРАЦИЯ === */
+
+function readFileSafe(p) {
+    try {
+        if (!fs.existsSync(p)) return { exists: false };
+        const buf = fs.readFileSync(p);
+        return { exists: true, size: buf.length, head: buf.slice(0,5).toString(), buf };
+    } catch (e) {
+        return { exists: false, error: e.message };
+    }
+}
+
+function assertPdfBufferOrThrow(label, bufObj) {
+    if (!bufObj.exists) throw new Error(`${label}: file not found`);
+    if (!bufObj.size) throw new Error(`${label}: file empty`);
+    if (bufObj.head !== '%PDF-') throw new Error(`${label}: not a PDF (head="${bufObj.head}")`);
+}
+
 async function generateAndAssemblePdf(name, language) {
     console.log(`🖌️ Сборка PDF: ${language}, ${name}`);
 
@@ -349,7 +367,11 @@ async function generateAndAssemblePdf(name, language) {
     if (!fs.existsSync(TEMPLATE_PATH)) throw new Error(`Шаблон name.pdf не найден по пути: ${TEMPLATE_PATH}`);
 
     // 1) Загружаем шаблон и готовим первую страницу
-    const templateBytes = fs.readFileSync(TEMPLATE_PATH);
+    // 1) Загружаем шаблон и проверяем, что это PDF
+    const probe = readFileSafe(TEMPLATE_PATH);
+    assertPdfBufferOrThrow('name.pdf', probe);
+    const templateBytes = probe.buf;
+
     const templateDoc = await PDFDocument.load(templateBytes);
     const pdfDoc = await PDFDocument.create();
     const [firstPage] = await pdfDoc.copyPages(templateDoc, [0]);
